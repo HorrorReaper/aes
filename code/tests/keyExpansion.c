@@ -5,10 +5,10 @@
 
 int main()
 {
-    u_int8_t * key = (u_int8_t *)malloc(16);
-    u_int8_t * roundKeys = (u_int8_t *)malloc(176);
+    uint8_t * key = (uint8_t *)malloc(16);
+    uint8_t * roundKeys = (uint8_t *)malloc(176);
 
-    u_int8_t check_round_key_1[176] = {
+    uint8_t check_round_key_1[176] = {
         0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x00,
@@ -69,7 +69,7 @@ int main()
         }
     }
 
-    u_int8_t key_data[16] = {
+    uint8_t key_data[16] = {
         0x12, 0x34, 0x56, 0x78,
         0x9a, 0xbc, 0xde, 0xf0,
         0x12, 0x34, 0x56, 0x78,
@@ -77,7 +77,7 @@ int main()
     };
     memcpy(key, key_data, 16);
 
-    u_int8_t check_round_key_2[176] = {
+    uint8_t check_round_key_2[176] = {
         0x12, 0x34, 0x56, 0x78,
         0x9a, 0xbc, 0xde, 0xf0,
         0x12, 0x34, 0x56, 0x78,
@@ -136,6 +136,8 @@ int main()
             return 1;
         }
     }
+    free(key);
+    free(roundKeys);
 
     return 0;
 }

@@ -1,6 +1,8 @@
 #include "aes.h"
 #include <stdio.h>
 #include <string.h>
+#include <stdint.h>
+#include <stdlib.h>
 
 // S-Box und Inverse S-Box
 
@@ -53,71 +55,417 @@ static const uint8_t rsbox[256] = {
     0x55, 0x21, 0x0c, 0x7d };
 
 unsigned int numRounds(unsigned int keySize) {
+    if (keySize == 128) {
+        return 10;
+    }
+    else if (keySize == 192) {
+        return 12;
+    }
+    else if (keySize == 256) {
+        return 14;
+    }
+
     return -1;
-}
+}//Test bestanden
 
 unsigned int numKeyWords(unsigned int keySize) {
+    // Gibt die Anzahl der Schlüsselwörter zur Schlüssellänge in Bit zurück, bei ungültiger Schlüssellänge wird -1 zurückgegeben
+    if (keySize == 128)
+        return 4;
+    else if (keySize == 192)
+        return 6;
+    else if (keySize == 256)
+        return 8;
     return -1;
+}//Test bestanden
+
+uint8_t getSBoxValue(uint8_t num) {
+    return sbox[num];
 }
 
-u_int8_t getSBoxValue(u_int8_t num) { return -1; }
-
-u_int8_t getSBoxInvert(u_int8_t num) { return -1; }
-
-u_int8_t rc(u_int8_t num) {
-    return -1;
+uint8_t getSBoxInvert(uint8_t num) {
+    // Gibt die Ergebnisse der inversen SBox für die Eingabe zurück. Die inverse S-Box ist in der Datei aes.c bereits bereitgestellt.
+    return rsbox[num];
 }
 
-void keyExpansion(u_int8_t* key, u_int8_t* roundKeys, unsigned int keySize) {
+
+uint8_t rc(uint8_t num) {
+    // Gibt den Rundenkonstantenwert rc für die Runde zurück.
+    uint8_t j = 0x01;
+    for (int i = 0; i < (num - 1); i++) {
+        //j <<= 1;
+        j = multiplyt2(j);
+    }
+    return j;
+}
+//bis hierher hat alles bestanden
+void keyExpansion(uint8_t* key, uint8_t* roundKeys, unsigned int keySize) {
+    uint8_t * expandedKey2 = NULL;
+    // Berechnung der Parameter
+    unsigned int keyWords = numKeyWords(keySize); // Anzahl Words im Schlüssel
+    unsigned int rounds = numRounds(keySize);    // Anzahl der Runden
+    printf("keyWords: %u, rounds: %u\n", keyWords, rounds);
+
+    int expandedKeySize = 4 * (rounds + 1); // Correct size calculation // Anzahl Wörter im erweiterten Schlüssel
+    printf("expandedKeySize: %u, requested size: %zu bytes\n", expandedKeySize, expandedKeySize * 4);
+
+    // Speicher für den erweiterten Schlüssel
+    //expandedKey = (uint8_t*)malloc(expandedKeySize * 4); //hier scheint der Fehler zu liegen: -		expandedKey	0xfffffffffb1fa110 <Fehler beim Lesen der Zeichen der Zeichenfolge.>	unsigned char *
+    expandedKey2 = (uint8_t*)calloc(expandedKeySize * 4, sizeof(uint8_t));
+    printf("expandedKey: %p\n", expandedKey2);
+
+    if (expandedKey2 == NULL || key == NULL || roundKeys == NULL) {
+        fprintf(stderr, "Memory allocation failed\n");
+        exit(1);
+    }
+
+    // Initialisierung
+    memcpy(expandedKey2, key, keyWords * 4);
+    uint8_t temp[4];
+
+    uint8_t rcon = 0x01;
+
+    // Schlüsselerweiterung
+    for (unsigned int i = keyWords; i < expandedKeySize; i++) {
+        memcpy(temp, expandedKey2 + (i - 1) * 4, 4);
+
+        if (i % keyWords == 0) {
+            // RotWord
+            uint8_t firstByte = temp[0];
+            temp[0] = getSBoxValue(temp[1]);
+            temp[1] = getSBoxValue(temp[2]);
+            temp[2] = getSBoxValue(temp[3]);
+            temp[3] = getSBoxValue(firstByte);
+
+            // Rcon XOR
+            rcon = rc(i / keyWords);
+            temp[0] ^= rcon;
+        }
+        else if (keyWords > 6 && i % keyWords == 4) {
+            // SubWord
+            for (unsigned int j = 0; j < 4; j++) {
+                temp[j] = getSBoxValue(temp[j]);
+            }
+        }
+
+        // Berechnung des erweiterten Schlüssels
+        for (unsigned int j = 0; j < 4; j++) {
+            expandedKey2[i * 4 + j] = expandedKey2[(i - keyWords) * 4 + j] ^ temp[j];
+        }
+    }
+
+    // Kopiere den erweiterten Schlüssel in roundKeys
+    memcpy(roundKeys, expandedKey2, expandedKeySize * 4);
+    free(expandedKey2);
+}
+//hat funktioniert
+
+void getRoundKey(uint8_t* roundKeys, uint8_t* roundKey, uint8_t round) {
+    // Gibt den Rundenschlüssel für die Runde round zurück.
+    memcpy(roundKey, roundKeys + round * 16, 16);
+
+}//hat funktioniert
+
+void addRoundKey(uint8_t* state, uint8_t* roundKey) {
+    // Addiert den Rundenschlüssel roundKey zum Zustand state.
+    for (int i = 0; i < 16; i++) {
+        state[i] ^= roundKey[i];//XOR 
+    }
+}//hat funktioniert
+
+void subBytes(uint8_t* state) {
+    // Substituiert die Bytes im Zustand state mit der S-Box.
+    for (int i = 0; i < 16; i++) {
+        state[i] = getSBoxValue(state[i]);
+    }
+
+}//hat funktioniert
+
+void shiftRows(uint8_t* state) {
+    // Verschiebt die Zeilen im Zustand state.
+    uint8_t temp[16];
+    memcpy(temp, state, 16);
+    state[1] = temp[5];
+    state[5] = temp[9];
+    state[9] = temp[13];
+    state[13] = temp[1];
+
+    state[2] = temp[10];
+    state[6] = temp[14];
+    state[10] = temp[2];
+    state[14] = temp[6];
+
+    state[3] = temp[15];
+    state[7] = temp[3];
+    state[11] = temp[7];
+    state[15] = temp[11];
+}//hat funktioniert
+
+void multiply2(uint8_t* state) {
+    // Multipliziert die Spalten im Zustand state mit zwei.
+    // Beachten Sie die spezielle Addition in der Galois-Field-Arithmetik.
+    // Für die Multiplikation mit zwei ist der Ausgangswert um eins nach links zu shiften, und anschließend mit dem Produkt von 0x1b und dem größten Bit des Ausgangswertes zu XORen, wenn das größte Bit des Ausgangswertes 1 ist.
+    for (int i = 0; i < 16; i++) {
+        uint8_t temp = state[i];
+        state[i] <<= 1;
+        if (temp & 0x80) {
+            state[i] ^= 0x1b;
+        }
+    }
+}// hat funktioniert
+
+
+void multiply3(uint8_t* state) {
+    // Multipliziert die Spalten im Zustand state mit drei.
+    // Beachten Sie die spezielle Addition in der Galois-Field-Arithmetik.
+    // Nutzen Sie die bekannten Multiplikation mit zwei und Addieren Sie anschließend einmal den Ausgangswert durch Verwendung von xor auf.
+    uint8_t temp[16];
+    memcpy(temp, state, 16);
+    multiply2(state);
+    for (int i = 0; i < 16; i++) {
+        state[i] ^= temp[i];
+    }
+}//hat funktioniert
+uint8_t multiplyt2(uint8_t state) {
+    // Multiplies the columns in the state with two.
+    // Take note of the special addition in Galois Field arithmetic.
+    // To multiply by two, the input value is left-shifted by one, and then XORed with 0x1b if the most significant bit of the input value is 1.
+    uint8_t result = state << 1;
+    if (state & 0x80) {
+        result ^= 0x1b;
+    }
+    return result;
 }
 
-void getRoundKey(u_int8_t* roundKeys, u_int8_t* roundKey, u_int8_t round) {
+uint8_t multiplyt3(uint8_t state) {
+    // Multiplies the columns in the state with three.
+    // Take note of the special addition in Galois Field arithmetic.
+    // Use the known multiplication by two and then XOR the output once using the input value.
+    return multiplyt2(state) ^ state;
 }
 
-void addRoundKey(u_int8_t* state, u_int8_t* roundKey) {
+void mixColumns(uint8_t* state) {
+    // Führt die Berechnug von mixColumns auf dem Zustand state durch.
+    uint8_t temp[16];
+    memcpy(temp, state, 16);
+    state[0] = multiplyt2(temp[0]) ^ multiplyt3(temp[1]) ^ temp[2] ^ temp[3];
+    state[1] = temp[0] ^ multiplyt2(temp[1]) ^ multiplyt3(temp[2]) ^ temp[3];
+    state[2] = temp[0] ^ temp[1] ^ multiplyt2(temp[2]) ^ multiplyt3(temp[3]);
+    state[3] = multiplyt3(temp[0]) ^ temp[1] ^ temp[2] ^ multiplyt2(temp[3]);
+
+    state[4] = multiplyt2(temp[4]) ^ multiplyt3(temp[5]) ^ temp[6] ^ temp[7];
+    state[5] = temp[4] ^ multiplyt2(temp[5]) ^ multiplyt3(temp[6]) ^ temp[7];
+    state[6] = temp[4] ^ temp[5] ^ multiplyt2(temp[6]) ^ multiplyt3(temp[7]);
+    state[7] = multiplyt3(temp[4]) ^ temp[5] ^ temp[6] ^ multiplyt2(temp[7]);
+
+    state[8] = multiplyt2(temp[8]) ^ multiplyt3(temp[9]) ^ temp[10] ^ temp[11];
+    state[9] = temp[8] ^ multiplyt2(temp[9]) ^ multiplyt3(temp[10]) ^ temp[11];
+    state[10] = temp[8] ^ temp[9] ^ multiplyt2(temp[10]) ^ multiplyt3(temp[11]);
+    state[11] = multiplyt3(temp[8]) ^ temp[9] ^ temp[10] ^ multiplyt2(temp[11]);
+
+    state[12] = multiplyt2(temp[12]) ^ multiplyt3(temp[13]) ^ temp[14] ^ temp[15];
+    state[13] = temp[12] ^ multiplyt2(temp[13]) ^ multiplyt3(temp[14]) ^ temp[15];
+    state[14] = temp[12] ^ temp[13] ^ multiplyt2(temp[14]) ^ multiplyt3(temp[15]);
+    state[15] = multiplyt3(temp[12]) ^ temp[13] ^ temp[14] ^ multiplyt2(temp[15]);
+}//hat funktioniert
+uint8_t multiplyt9(uint8_t value) {
+    return multiplyt2(multiplyt2(multiplyt2(value))) ^ value; // 9 = 2^3 + 1
 }
 
-void subBytes(u_int8_t* state) {
+uint8_t multiplytB(uint8_t value) {
+    return multiplyt9(value) ^ multiplyt2(value); // B = 2^3 + 2 + 1
 }
 
-void shiftRows(u_int8_t* state) {
+uint8_t multiplytD(uint8_t value) {
+    return multiplyt9(value) ^ multiplyt2(multiplyt2(value)); // D = 2^3 + 2^2 + 1
 }
 
-void multiply2(u_int8_t* state) {
+uint8_t multiplytE(uint8_t value) {
+    return multiplyt2(multiplyt2(multiplyt2(value))) ^ multiplyt2(multiplyt2(value)) ^ multiplyt2(value); // E = 2^3 + 2^2 + 2
 }
 
-void multiply3(u_int8_t* state) {
+void invMixColumns(uint8_t* state) {
+    // Umkehrung von mixColumns. Entnehmen Sie die MixColumns-Matrix aus dem bereitgestellten Buch.
+    // Für die Multiplikation mit 9, 11, 13 und 14 können Sie die Funktion Multiply verwenden, die in der Datei aes.c bereitgestellt ist.
+    uint8_t temp[16];
+    memcpy(temp, state, 16);
+
+    for (int i = 0; i < 4; i++) {
+        state[i * 4 + 0] = multiplytE(temp[i * 4 + 0]) ^ multiplytB(temp[i * 4 + 1]) ^ multiplytD(temp[i * 4 + 2]) ^ multiplyt9(temp[i * 4 + 3]);
+        state[i * 4 + 1] = multiplyt9(temp[i * 4 + 0]) ^ multiplytE(temp[i * 4 + 1]) ^ multiplytB(temp[i * 4 + 2]) ^ multiplytD(temp[i * 4 + 3]);
+        state[i * 4 + 2] = multiplytD(temp[i * 4 + 0]) ^ multiplyt9(temp[i * 4 + 1]) ^ multiplytE(temp[i * 4 + 2]) ^ multiplytB(temp[i * 4 + 3]);
+        state[i * 4 + 3] = multiplytB(temp[i * 4 + 0]) ^ multiplytD(temp[i * 4 + 1]) ^ multiplyt9(temp[i * 4 + 2]) ^ multiplytE(temp[i * 4 + 3]);
+    }
+}//hat funktioniert
+
+void printBlock(uint8_t* block) {
+    for (int i = 0; i < 16; i++) {
+        printf("%02x ", block[i]);
+        if (i % 4 == 3) {
+            printf("\n");
+        }
+    }
 }
 
-void mixColumns(u_int8_t* state) {
-}
+void encrypt(uint8_t* block, uint8_t* roundKeys, unsigned int rounds) {
+    // Verschlüsselt den Block mit den expandierten Schlüsseln roundKeys und der Anzahl der Runden rounds.
+    addRoundKey(block, roundKeys);
+    for (int i = 1; i < rounds; i++) {
+        subBytes(block);
+        shiftRows(block);
+        mixColumns(block);
+        addRoundKey(block, roundKeys + i * 16);
+    }
+    subBytes(block);
+    shiftRows(block);
+    addRoundKey(block, roundKeys + rounds * 16);
+}//hat funktioniert
 
-void invMixColumns(u_int8_t* state) {
-}
+void invSubBytes(uint8_t* state) {
+    // Umkehrung von subBytes. Nutzen Sie die inverse S-Box, die in der Datei aes.c bereitgestellt ist.
+    for (int i = 0; i < 16; i++) {
+        state[i] = getSBoxInvert(state[i]);
+    }
+}//hat funktioniert
 
-void printBlock(u_int8_t* block) {
-}
+void invShiftRows(uint8_t* state) {
+    // Umkehrung von shiftRows.
+    uint8_t temp[16];
+    memcpy(temp, state, 16);
 
-void encrypt(u_int8_t* block, u_int8_t* roundKeys, unsigned int rounds) {
-}
 
-void invSubBytes(u_int8_t* state) {
-}
+    state[5] = temp[1];
+    state[9] = temp[5];
+    state[13] = temp[9];
+    state[1] = temp[13];
 
-void invShiftRows(u_int8_t *state) {
-}
+    state[10] = temp[2];
+    state[14] = temp[6];
+    state[2] = temp[10];
+    state[6] = temp[14];
 
-void decrypt(u_int8_t* block, u_int8_t* roundKeys, unsigned int rounds) {
-}
+    state[15] = temp[3];
+    state[3] = temp[7];
+    state[7] = temp[11];
+    state[11] = temp[15];
+}//hat funktioniert
 
-void ecb_encrypt(u_int8_t *content, u_int8_t *key, unsigned int keySize, size_t length){
-}
+void decrypt(uint8_t* block, uint8_t* roundKeys, unsigned int rounds) {
+    // Entschlüsselt den Block mit den expandierten Schlüsseln roundKeys und der Anzahl der Runden rounds.
+    addRoundKey(block, roundKeys + rounds * 16);
+    invShiftRows(block);
+    invSubBytes(block);
+    for (int i = rounds - 1; i > 0; i--) {
+        addRoundKey(block, roundKeys + i * 16);
+        invMixColumns(block);
+        invShiftRows(block);
+        invSubBytes(block);
+    }
+    addRoundKey(block, roundKeys);
+}//hat funktioniert
 
-void ecb_decrypt(u_int8_t *content, u_int8_t *key, unsigned int keySize, size_t length){
-}
+void ecb_encrypt(uint8_t* content, uint8_t* key, unsigned int keySize, size_t length) {
+    // Verschlüsselt den Inhalt mit dem Schlüssel key und der Schlüssellänge keySize unter Verwendung des ECB-Verfahrens.
+    unsigned int rounds = numRounds(keySize);
+    unsigned int expandedKeySize = 4 * (rounds + 1);
+    uint8_t* roundKeys = (uint8_t*)malloc(expandedKeySize * 4 * sizeof(uint8_t));
+    if (roundKeys == NULL) {
+        fprintf(stderr, "Memory allocation failed\n");
+        exit(1);
+    }
+    keyExpansion(key, roundKeys, keySize);
 
-void cbc_encrypt(u_int8_t *content, u_int8_t *key, unsigned int keySize, u_int8_t *iv, size_t length) {
-}
+    for (size_t i = 0; i < length; i += 16) {
+        encrypt(content + i, roundKeys, rounds);
+    }
 
-void cbc_decrypt(u_int8_t *content, u_int8_t *key, unsigned int keySize, u_int8_t *iv, size_t length) {
+    free(roundKeys);
 }
+//hat funktioniert
+
+void ecb_decrypt(uint8_t* content, uint8_t* key, unsigned int keySize, size_t length) {
+    // Entschlüsselt den Inhalt mit dem Schlüssel key und der Schlüssellänge keySize unter Verwendung des ECB-Verfahrens.
+    unsigned int rounds = numRounds(keySize);
+    unsigned int expandedKeySize = 4 * (rounds + 1);
+    uint8_t* roundKeys = (uint8_t*)malloc(expandedKeySize * 4 * sizeof(uint8_t));
+    if (roundKeys == NULL) {
+        fprintf(stderr, "Memory allocation failed\n");
+        exit(1);
+    }
+    keyExpansion(key, roundKeys, keySize);
+
+    for (size_t i = 0; i < length; i += 16) {
+        decrypt(content + i, roundKeys, rounds);
+    }
+
+    free(roundKeys);
+}
+//hat funktioniert
+void cbc_encrypt(uint8_t* content, uint8_t* key, unsigned int keySize, uint8_t* iv, size_t length) {
+    // Verschlüsselt den Inhalt mit dem Schlüssel key und der Schlüssellänge keySize unter Verwendung des CBC-Verfahrens mit dem Initialisierungsvektor iv.
+    unsigned int rounds = numRounds(keySize);
+    unsigned int expandedKeySize = 4 * (rounds + 1);
+    uint8_t* roundKeys = (uint8_t*)malloc(expandedKeySize * 4 * sizeof(uint8_t));
+    if (roundKeys == NULL) {
+        fprintf(stderr, "Memory allocation failed\n");
+        exit(1);
+    }
+    keyExpansion(key, roundKeys, keySize);
+
+    uint8_t* ivCopy = (uint8_t*)malloc(16 * sizeof(uint8_t));
+    if (ivCopy == NULL) {
+        fprintf(stderr, "Memory allocation failed\n");
+        exit(1);
+    }
+    memcpy(ivCopy, iv, 16);
+
+    for (size_t i = 0; i < length; i += 16) {
+        for (int j = 0; j < 16; j++) {
+            content[i + j] ^= ivCopy[j];
+        }
+        encrypt(content + i, roundKeys, rounds);
+        memcpy(ivCopy, content + i, 16);
+    }
+
+    free(roundKeys);
+    free(ivCopy);
+}
+//hat funktioniert
+
+void cbc_decrypt(uint8_t* content, uint8_t* key, unsigned int keySize, uint8_t* iv, size_t length) {
+    // Entschlüsselt den Inhalt mit dem Schlüssel key und der Schlüssellänge keySize unter Verwendung des CBC-Verfahrens mit dem Initialisierungsvektor iv.
+    unsigned int rounds = numRounds(keySize);
+    unsigned int expandedKeySize = 4 * (rounds + 1);
+    uint8_t* roundKeys = (uint8_t*)malloc(expandedKeySize * 4 * sizeof(uint8_t));
+    if (roundKeys == NULL) {
+        fprintf(stderr, "Memory allocation failed\n");
+        exit(1);
+    }
+    keyExpansion(key, roundKeys, keySize);
+
+    uint8_t* ivCopy = (uint8_t*)malloc(16 * sizeof(uint8_t));
+    if (ivCopy == NULL) {
+        fprintf(stderr, "Memory allocation failed\n");
+        exit(1);
+    }
+    memcpy(ivCopy, iv, 16);
+
+    for (size_t i = 0; i < length; i += 16) {
+        uint8_t* temp = (uint8_t*)malloc(16 * sizeof(uint8_t));
+        if (temp == NULL) {
+            fprintf(stderr, "Memory allocation failed\n");
+            exit(1);
+        }
+        memcpy(temp, content + i, 16);
+        decrypt(content + i, roundKeys, rounds);
+        for (int j = 0; j < 16; j++) {
+            content[i + j] ^= ivCopy[j];
+        }
+        memcpy(ivCopy, temp, 16);
+        free(temp);
+    }
+
+    free(roundKeys);
+    free(ivCopy);
+}
+//hat funktioniert

@@ -3,7 +3,7 @@
 
 int main()
 {
-    u_int8_t round_keys[176] = {
+    uint8_t round_keys[176] = {
         0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x00,
@@ -50,7 +50,7 @@ int main()
         0x6f, 0x8f, 0x18, 0x8e
     };
 
-    u_int8_t round_key[16];
+    uint8_t round_key[16];
     getRoundKey(round_keys, round_key, 0);
 
     for(int i = 0; i < 16; i++)

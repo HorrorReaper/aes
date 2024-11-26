@@ -1,0 +1,308 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1,
+						2
+					],
+					"jsonFile" : "directory-.-Debug-d0094a50bb2071803777.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.22"
+					},
+					"projectIndex" : 0,
+					"source" : "."
+				},
+				{
+					"build" : "src",
+					"jsonFile" : "directory-src-Debug-c94b7c2814d5a21df52c.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.22"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "src",
+					"targetIndexes" : 
+					[
+						1
+					]
+				},
+				{
+					"build" : "tests",
+					"jsonFile" : "directory-tests-Debug-70e4927a02b591d5c1f8.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.22"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "tests",
+					"targetIndexes" : 
+					[
+						0,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12,
+						13,
+						14,
+						15,
+						16,
+						17,
+						18,
+						19,
+						20,
+						21,
+						22,
+						23,
+						24
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0,
+						1,
+						2
+					],
+					"name" : "aes",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12,
+						13,
+						14,
+						15,
+						16,
+						17,
+						18,
+						19,
+						20,
+						21,
+						22,
+						23,
+						24
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 2,
+					"id" : "addRoundKey::@a44f0ac069e85531cdee",
+					"jsonFile" : "target-addRoundKey-Debug-303b66637ed59b7cbd36.json",
+					"name" : "addRoundKey",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "aes::@145eef247bfb46b6828c",
+					"jsonFile" : "target-aes-Debug-841801ec5c67ccad8ebf.json",
+					"name" : "aes",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "aes192::@a44f0ac069e85531cdee",
+					"jsonFile" : "target-aes192-Debug-8abeff74eb65513c2e83.json",
+					"name" : "aes192",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "aes256::@a44f0ac069e85531cdee",
+					"jsonFile" : "target-aes256-Debug-ef9a81f61ab56166b39c.json",
+					"name" : "aes256",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "cbc_decrypt::@a44f0ac069e85531cdee",
+					"jsonFile" : "target-cbc_decrypt-Debug-ba7977310a9c88acacf3.json",
+					"name" : "cbc_decrypt",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "cbc_encrypt::@a44f0ac069e85531cdee",
+					"jsonFile" : "target-cbc_encrypt-Debug-58ed1d8d652cfd089c37.json",
+					"name" : "cbc_encrypt",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "decrypt::@a44f0ac069e85531cdee",
+					"jsonFile" : "target-decrypt-Debug-ec6b6fdf5b4b14560e86.json",
+					"name" : "decrypt",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "ecb_decrypt::@a44f0ac069e85531cdee",
+					"jsonFile" : "target-ecb_decrypt-Debug-3c12197200baf1fcd910.json",
+					"name" : "ecb_decrypt",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "ecb_encrypt::@a44f0ac069e85531cdee",
+					"jsonFile" : "target-ecb_encrypt-Debug-01a6f0f16a5bf122c78d.json",
+					"name" : "ecb_encrypt",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "encrypt::@a44f0ac069e85531cdee",
+					"jsonFile" : "target-encrypt-Debug-45f69228baa0183efd9a.json",
+					"name" : "encrypt",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "encrypt_decrypt::@a44f0ac069e85531cdee",
+					"jsonFile" : "target-encrypt_decrypt-Debug-8413631040b326f45777.json",
+					"name" : "encrypt_decrypt",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "getRoundKey::@a44f0ac069e85531cdee",
+					"jsonFile" : "target-getRoundKey-Debug-4a5cfc9d2dd513d07c6a.json",
+					"name" : "getRoundKey",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "invMixColumns::@a44f0ac069e85531cdee",
+					"jsonFile" : "target-invMixColumns-Debug-0f9d54fbaa64b13f04d1.json",
+					"name" : "invMixColumns",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "invShiftRows::@a44f0ac069e85531cdee",
+					"jsonFile" : "target-invShiftRows-Debug-4e6acdaa588448b67d7a.json",
+					"name" : "invShiftRows",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "invSubBytes::@a44f0ac069e85531cdee",
+					"jsonFile" : "target-invSubBytes-Debug-1ac0d4aa1c0a86bb1fb3.json",
+					"name" : "invSubBytes",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "keyExpansion::@a44f0ac069e85531cdee",
+					"jsonFile" : "target-keyExpansion-Debug-24d1e23d831dfeeb8fc0.json",
+					"name" : "keyExpansion",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "mixColumns::@a44f0ac069e85531cdee",
+					"jsonFile" : "target-mixColumns-Debug-5463729d23615e63455b.json",
+					"name" : "mixColumns",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "mul2::@a44f0ac069e85531cdee",
+					"jsonFile" : "target-mul2-Debug-495fcc42855790d71957.json",
+					"name" : "mul2",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "mul3::@a44f0ac069e85531cdee",
+					"jsonFile" : "target-mul3-Debug-d4f83f2e64a633617076.json",
+					"name" : "mul3",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "numKeyWords::@a44f0ac069e85531cdee",
+					"jsonFile" : "target-numKeyWords-Debug-ff3225429bcfcce31741.json",
+					"name" : "numKeyWords",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "numRounds::@a44f0ac069e85531cdee",
+					"jsonFile" : "target-numRounds-Debug-54073308bb106caee215.json",
+					"name" : "numRounds",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "rc::@a44f0ac069e85531cdee",
+					"jsonFile" : "target-rc-Debug-79f59fe451b7c877d7ea.json",
+					"name" : "rc",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "sboxes::@a44f0ac069e85531cdee",
+					"jsonFile" : "target-sboxes-Debug-50018d0915cbc9d0b0bb.json",
+					"name" : "sboxes",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "shiftRows::@a44f0ac069e85531cdee",
+					"jsonFile" : "target-shiftRows-Debug-71c1094d127756dae8c2.json",
+					"name" : "shiftRows",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "subBytes::@a44f0ac069e85531cdee",
+					"jsonFile" : "target-subBytes-Debug-21afd7397c375fe780b7.json",
+					"name" : "subBytes",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "C:/Users/patri/source/repos/AES-Test/code/out/build/x64-Debug",
+		"source" : "C:/Users/patri/source/repos/AES-Test/code"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 6
+	}
+}
